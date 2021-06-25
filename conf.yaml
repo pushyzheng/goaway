@@ -1,0 +1,6 @@
+port: 8080
+auth: false
+
+mapping:
+  app1: 5000
+  app2: 5000
