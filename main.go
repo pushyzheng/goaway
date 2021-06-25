@@ -27,11 +27,11 @@ var conf Setting
 func (h *handle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%s %s\n", r.Method, r.URL)
 
-	if r.RequestURI == "/Login" || r.RequestURI == "/Login/" {
+	if r.RequestURI == "/login" || r.RequestURI == "/login/" {
 		Login(w)
 		return
 	}
-	if r.RequestURI == "/Submit" || r.RequestURI == "/Submit/" {
+	if r.RequestURI == "/submit" || r.RequestURI == "/submit/" {
 		Submit(w, r)
 		return
 	}
@@ -54,7 +54,7 @@ func (h *handle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	http.Redirect(w, r, "/Login/", http.StatusSeeOther)
+	http.Redirect(w, r, "/login/", http.StatusSeeOther)
 }
 
 func getProxyServerPort(r *http.Request) (int, error) {

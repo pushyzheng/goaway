@@ -13,7 +13,7 @@ var Sessions = make(map[string]string)
 func Login(w http.ResponseWriter) {
 	// return Login.html page
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	t, err := template.ParseFiles("Login.html")
+	t, err := template.ParseFiles("login.html")
 	if err != nil {
 		fmt.Fprintf(w, "Unable to load template")
 	}
@@ -26,7 +26,7 @@ func Submit(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 	if username != "admin" || password != "123456" {
-		http.Redirect(w, r, "/Login/", http.StatusSeeOther)
+		http.Redirect(w, r, "/login/", http.StatusSeeOther)
 		return
 	}
 	// Login succeed, set cookie to client and save session
