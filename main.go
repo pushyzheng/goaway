@@ -38,7 +38,7 @@ func (h *handle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cookie, _ := r.Cookie("SESSIONID")
 	if cookie != nil {
 		sessionId := cookie.Value
-		if _, ok := Sessions[sessionId]; ok && conf.auth {
+		if _, ok := Sessions[sessionId]; ok {
 			port, err := getProxyServerPort(r)
 			if err != nil {
 				w.Write([]byte(err.Error()))
