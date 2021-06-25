@@ -5,6 +5,6 @@ WORKDIR /go/src/app
 COPY . .
 
 RUN go env -w GOPROXY="https://goproxy.io,direct"
-RUN go build main.go
+RUN go build main.go auth.go
 
 CMD ["./main"]

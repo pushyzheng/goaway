@@ -1,6 +1,5 @@
-port: 8080
-auth: false
+port: 3000
+auth: true
 
 mapping:
-  app1: 5000
-  app2: 5000
+  nginx: 5002
