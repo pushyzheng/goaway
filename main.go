@@ -27,18 +27,18 @@ var conf Setting
 func (h *handle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%s %s\n", r.Method, r.URL)
 
-	if r.RequestURI == "/login" || r.RequestURI == "/login/" {
-		login(w)
+	if r.RequestURI == "/Login" || r.RequestURI == "/Login/" {
+		Login(w)
 		return
 	}
-	if r.RequestURI == "/submit" || r.RequestURI == "/submit/" {
-		submit(w, r)
+	if r.RequestURI == "/Submit" || r.RequestURI == "/Submit/" {
+		Submit(w, r)
 		return
 	}
 	cookie, _ := r.Cookie("SESSIONID")
 	if cookie != nil {
 		sessionId := cookie.Value
-		if _, ok := sessions[sessionId]; ok && conf.auth {
+		if _, ok := Sessions[sessionId]; ok && conf.auth {
 			port, err := getProxyServerPort(r)
 			if err != nil {
 				w.Write([]byte(err.Error()))
@@ -54,7 +54,7 @@ func (h *handle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	http.Redirect(w, r, "/login/", http.StatusSeeOther)
+	http.Redirect(w, r, "/Login/", http.StatusSeeOther)
 }
 
 func getProxyServerPort(r *http.Request) (int, error) {

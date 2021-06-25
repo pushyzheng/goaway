@@ -8,28 +8,28 @@ import (
 	"time"
 )
 
-var sessions = make(map[string]string)
+var Sessions = make(map[string]string)
 
-func login(w http.ResponseWriter) {
-	// return login.html page
+func Login(w http.ResponseWriter) {
+	// return Login.html page
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	t, err := template.ParseFiles("login.html")
+	t, err := template.ParseFiles("Login.html")
 	if err != nil {
 		fmt.Fprintf(w, "Unable to load template")
 	}
 	t.Execute(w, nil)
 }
 
-func submit(w http.ResponseWriter, r *http.Request) {
+func Submit(w http.ResponseWriter, r *http.Request) {
 	// parse form, then check username and password
 	r.ParseForm()
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 	if username != "admin" || password != "123456" {
-		http.Redirect(w, r, "/login/", http.StatusSeeOther)
+		http.Redirect(w, r, "/Login/", http.StatusSeeOther)
 		return
 	}
-	// login succeed, set cookie to client and save session
+	// Login succeed, set cookie to client and save session
 	id := string(uuid.Rand().Hex())
 	http.SetCookie(w, &http.Cookie{
 		Name:    "SESSIONID",
@@ -38,6 +38,6 @@ func submit(w http.ResponseWriter, r *http.Request) {
 		Expires: time.Now().Add(10 * time.Minute),
 		MaxAge:  90000,
 	})
-	sessions[id] = id
+	Sessions[id] = id
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
