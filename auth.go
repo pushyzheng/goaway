@@ -36,6 +36,7 @@ func Submit(w http.ResponseWriter, r *http.Request) {
 		Value:   id,
 		Path:    "/",
 		Expires: time.Now().Add(10 * time.Minute),
+		Domain:  "pushyzheng.com",
 		MaxAge:  90000,
 	})
 	Sessions[id] = id
