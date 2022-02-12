@@ -11,6 +11,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 const (
@@ -25,12 +26,13 @@ type handle struct {
 }
 
 type Setting struct {
-	Port     int            `yaml:"port"`
-	Auth     bool           `yaml:"auth"`
-	Domain   string         `yaml:"domain"`
-	Username string         `yaml:"username"`
-	Password string         `yaml:"password"`
-	Mapping  map[string]int `yaml:"mapping"`
+	Port               int            `yaml:"port"`
+	Auth               bool           `yaml:"auth"`
+	Domain             string         `yaml:"domain"`
+	Username           string         `yaml:"username"`
+	Password           string         `yaml:"password"`
+	CookieExpiredHours time.Duration  `yaml:"cookie-expired-hours"`
+	Mapping            map[string]int `yaml:"mapping"`
 }
 
 type ErrorResponse struct {
@@ -133,6 +135,6 @@ func main() {
 	if err != nil {
 		log.Fatalln("cannot load setting: \n", err)
 	}
-
+	fmt.Println("Read config successfully: ", conf)
 	runServer()
 }

@@ -43,7 +43,7 @@ func Submit(w http.ResponseWriter, r *http.Request) {
 		Name:    IdentityKeyName,
 		Value:   id,
 		Path:    "/",
-		Expires: time.Now().Add(72 * time.Hour),
+		Expires: time.Now().Add(conf.CookieExpiredHours * time.Hour),
 		Domain:  conf.Domain,
 		MaxAge:  90000,
 	})

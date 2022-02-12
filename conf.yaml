@@ -5,6 +5,7 @@ username: admin
 password: 123456
 
 domain: localhost
+cookie-expired-hours: 72
 
 mapping:
   nginx: 5000
