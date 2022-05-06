@@ -1,0 +1,30 @@
+server:
+  port: 3000
+  domain: localhost
+  cookie-expired-hours: 72
+
+accounts:
+  admin:
+    enable: true
+    is-admin: true
+    password: 123456
+  mark:
+    enable: true
+    password: 123456
+
+applications:
+  flask:
+    enable: true
+    port: 5000
+
+permissions:
+  admin:
+    flask:
+      enable: true
+      excluded-paths:
+        - /admin
+  mark:
+    flask:
+      enable: true
+      excluded-paths:
+        - /admin

@@ -3,14 +3,10 @@ from flask import Flask, request
 app = Flask(__name__)
 
 
-@app.route('/', methods=['POST'])
+@app.route('/', methods=['GET'])
 def index():
-    import time
-    time.sleep(2)
-
     print(request.args)
     print(request.json)
-
     return 'hello 1'
 
 

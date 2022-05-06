@@ -1,13 +1,26 @@
 package main
 
 import (
+	"encoding/json"
 	logger "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"time"
 )
 
-var conf Setting
+const (
+	Prod EnvType = "prod"
+	Dev  EnvType = "dev"
+	Test EnvType = "test"
+)
+
+type EnvType string
+
+type Server struct {
+	Port               int           `yaml:"port"`
+	Domain             string        `yaml:"domain"`
+	CookieExpiredHours time.Duration `yaml:"cookie-expired-hours"`
+}
 
 type Account struct {
 	Enable   bool   `yaml:"enable"`
@@ -20,17 +33,30 @@ type Application struct {
 	Port   int  `yaml:"port"`
 }
 
-type Setting struct {
-	Port               int                    `yaml:"port"`
-	Auth               bool                   `yaml:"auth"`
-	Domain             string                 `yaml:"domain"`
-	Accounts           map[string]Account     `yaml:"accounts"`             // name -> Account
-	Applications       map[string]Application `yaml:"applications"`         // name -> Application
-	CookieExpiredHours time.Duration          `yaml:"cookie-expired-hours"` //
+type Permission struct {
+	Enable        bool     `yaml:"enable"`
+	ExcludedPaths []string `yaml:"excluded-paths"`
 }
 
-func LoadConfig() error {
-	buf, err := ioutil.ReadFile("conf.yaml")
+type Setting struct {
+	Server       Server                           `yaml:"server"`
+	Accounts     map[string]Account               `yaml:"accounts"`     // name -> Account
+	Applications map[string]Application           `yaml:"applications"` // name -> Application
+	Permissions  map[string]map[string]Permission `yaml:"permissions"`  // username -> {appName -> Permission}
+}
+
+var conf Setting
+
+func LoadConfig(envType EnvType) error {
+	logger.Info("Start loading config file, envType:", envType)
+	var filename string
+	if envType == Prod {
+		filename = "conf.yaml"
+	} else {
+		filename = "conf_" + string(envType) + ".yaml"
+	}
+
+	buf, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err
 	}
@@ -39,6 +65,15 @@ func LoadConfig() error {
 	if err != nil {
 		return err
 	}
-	logger.Info("Read config successfully: \n", string(buf))
+	logger.Infof("Read config %s successfully: \n %s", filename, toJson(conf))
 	return nil
+}
+
+func toJson(setting Setting) string {
+	buf, err := json.Marshal(setting)
+	if err != nil {
+		logger.Error("toJson error", err.Error())
+		return ""
+	}
+	return string(buf)
 }

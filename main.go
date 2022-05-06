@@ -89,26 +89,28 @@ func returnError(w http.ResponseWriter, code int, msg string) {
 	if code == http.StatusUnauthorized {
 		resp.RedirectToLogin = true
 	}
-	t.Execute(w, resp)
+	_ = t.Execute(w, resp)
 }
 
 func runServer() {
 	h := &handle{}
-	logger.Infof("Running on http://localhost:%d", conf.Port)
-	err := http.ListenAndServe(":"+strconv.Itoa(conf.Port), h)
+	logger.Infof("Running on http://localhost:%d", conf.Server.Port)
+	err := http.ListenAndServe(":"+strconv.Itoa(conf.Server.Port), h)
 	if err != nil {
 		log.Fatalln("ListenAndServe: ", err)
 	}
 }
 
 func main() {
-	logger.SetFormatter(&logger.TextFormatter{
-		FullTimestamp: true,
-	})
-
-	err := LoadConfig()
+	err := LoadConfig(Prod)
 	if err != nil {
 		panic("cannot load config: " + err.Error())
 	}
 	runServer()
+}
+
+func init() {
+	logger.SetFormatter(&logger.TextFormatter{
+		FullTimestamp: true,
+	})
 }

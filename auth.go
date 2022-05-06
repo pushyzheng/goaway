@@ -21,7 +21,7 @@ func Login(resp http.ResponseWriter) {
 		_, _ = fmt.Fprintf(resp, "Unable to load template")
 		return
 	}
-	t.Execute(resp, nil)
+	_ = t.Execute(resp, nil)
 }
 
 // Submit parse form, then check username and password
@@ -49,8 +49,8 @@ func Submit(resp http.ResponseWriter, req *http.Request) {
 		Name:    IdentityKeyName,
 		Value:   id,
 		Path:    "/",
-		Expires: time.Now().Add(conf.CookieExpiredHours * time.Hour),
-		Domain:  conf.Domain,
+		Expires: time.Now().Add(conf.Server.CookieExpiredHours * time.Hour),
+		Domain:  conf.Server.Domain,
 		MaxAge:  90000,
 	})
 	sessions.Store(id, id)
