@@ -6,13 +6,13 @@ import (
 )
 
 func TestName(t *testing.T) {
-	fmt.Println(conf.Server)
+	fmt.Println(Conf.Server)
 
-	fmt.Println(conf.Accounts["admin"])
+	fmt.Println(Conf.Accounts["admin"])
 
-	fmt.Println(conf.Applications["flask"])
+	fmt.Println(Conf.Applications["flask"])
 
-	fmt.Println(conf.Permissions["admin"])
+	fmt.Println(Conf.Permissions["admin"])
 }
 
 func init() {

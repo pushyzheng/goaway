@@ -17,41 +17,41 @@ const (
 type EnvType string
 
 type Server struct {
-	Port               int           `yaml:"port"`
-	Domain             string        `yaml:"domain"`
-	CookieExpiredHours time.Duration `yaml:"cookie-expired-hours"`
+	Port               int           `yaml:"port" json:"port"`
+	Domain             string        `yaml:"domain" json:"domain"`
+	CookieExpiredHours time.Duration `yaml:"cookie-expired-hours" json:"CookieExpiredHours"`
 }
 
 type Account struct {
-	Enable   bool   `yaml:"enable"`
-	IsAdmin  bool   `yaml:"is-admin"`
-	Password string `yaml:"password"`
+	Enable   bool   `yaml:"enable" json:"enable"`
+	IsAdmin  bool   `yaml:"is-admin" json:"isAdmin"`
+	Password string `yaml:"password" json:"password"`
 }
 
 type Application struct {
-	Enable bool `yaml:"enable"`
-	Port   int  `yaml:"port"`
+	Enable bool `yaml:"enable" json:"enable"`
+	Port   int  `yaml:"port" json:"port"`
 }
 
 type Permission struct {
-	Enable        bool     `yaml:"enable"`
-	ExcludedPaths []string `yaml:"excluded-paths"`
+	Enable        bool     `yaml:"enable" json:"enable"`
+	ExcludedPaths []string `yaml:"excluded-paths" json:"excludedPaths"`
 }
 
 type Setting struct {
-	Server       Server                           `yaml:"server"`
-	Accounts     map[string]Account               `yaml:"accounts"`     // name -> Account
-	Applications map[string]Application           `yaml:"applications"` // name -> Application
-	Permissions  map[string]map[string]Permission `yaml:"permissions"`  // username -> {appName -> Permission}
+	Server       Server                           `yaml:"server" json:"server"`
+	Accounts     map[string]Account               `yaml:"accounts" json:"accounts"`         // name -> Account
+	Applications map[string]Application           `yaml:"applications" json:"applications"` // name -> Application
+	Permissions  map[string]map[string]Permission `yaml:"permissions" json:"permissions"`   // username -> {appName -> Permission}
 }
 
-var conf Setting
+var Conf Setting
 
 func LoadConfig(envType EnvType) error {
 	logger.Info("Start loading config file, envType:", envType)
 	var filename string
 	if envType == Prod {
-		filename = "conf.yaml"
+		filename = "Conf.yaml"
 	} else {
 		filename = "conf_" + string(envType) + ".yaml"
 	}
@@ -60,12 +60,12 @@ func LoadConfig(envType EnvType) error {
 	if err != nil {
 		return err
 	}
-	conf = Setting{}
-	err = yaml.Unmarshal(buf, &conf)
+	Conf = Setting{}
+	err = yaml.Unmarshal(buf, &Conf)
 	if err != nil {
 		return err
 	}
-	logger.Infof("Read config %s successfully: \n %s", filename, toJson(conf))
+	logger.Infof("Read config %s successfully: \n %s", filename, toJson(Conf))
 	return nil
 }
 

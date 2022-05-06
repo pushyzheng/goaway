@@ -12,7 +12,7 @@ func GetPermissions(name string) (map[string]Permission, bool) {
 	if len(name) == 0 {
 		return nil, false
 	}
-	if p, ok := conf.Permissions[name]; !ok {
+	if p, ok := Conf.Permissions[name]; !ok {
 		return nil, false
 	} else {
 		return p, true
@@ -37,7 +37,7 @@ func HasPermission(name string, appName string, uri string) (bool, string) {
 	var p Permission
 	var exists bool
 
-	if at, exists = conf.Accounts[name]; !exists || !at.Enable {
+	if at, exists = Conf.Accounts[name]; !exists || !at.Enable {
 		return false, InvalidAccount
 	}
 	if at.IsAdmin {

@@ -13,7 +13,7 @@ import (
 var sessions = sync.Map{}
 
 // Login Return login html page
-func Login(resp http.ResponseWriter) {
+func Login(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Content-Type", "text/html; charset=utf-8")
 	t, err := template.ParseFiles("static/login.html")
 	if err != nil {
@@ -33,14 +33,14 @@ func Submit(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 	username := req.FormValue("username")
-	if _, ok := conf.Accounts[username]; !ok {
-		returnError(resp, http.StatusUnauthorized, "INVALID ACCOUNT")
+	if _, ok := Conf.Accounts[username]; !ok {
+		ReturnError(resp, http.StatusUnauthorized, "INVALID ACCOUNT")
 		return
 	}
-	account := conf.Accounts[username]
+	account := Conf.Accounts[username]
 	password := req.FormValue("password")
 	if password != account.Password {
-		returnError(resp, http.StatusUnauthorized, "INVALID USERNAME OR PASSWORD")
+		ReturnError(resp, http.StatusUnauthorized, "INVALID USERNAME OR PASSWORD")
 		return
 	}
 	// Login succeed, set cookie to client and save session
@@ -49,8 +49,8 @@ func Submit(resp http.ResponseWriter, req *http.Request) {
 		Name:    IdentityKeyName,
 		Value:   id,
 		Path:    "/",
-		Expires: time.Now().Add(conf.Server.CookieExpiredHours * time.Hour),
-		Domain:  conf.Server.Domain,
+		Expires: time.Now().Add(Conf.Server.CookieExpiredHours * time.Hour),
+		Domain:  Conf.Server.Domain,
 		MaxAge:  90000,
 	})
 	sessions.Store(id, id)
