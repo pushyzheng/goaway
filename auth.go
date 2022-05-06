@@ -2,44 +2,45 @@ package main
 
 import (
 	"fmt"
+	logger "github.com/sirupsen/logrus"
 	"github.com/snluu/uuid"
 	"html/template"
-	"log"
 	"net/http"
+	"sync"
 	"time"
 )
 
-var Sessions = make(map[string]string)
+var sessions = sync.Map{}
 
-func Login(w http.ResponseWriter) {
-	// Return login html page
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	t, err := template.ParseFiles("login.html")
+// Login Return login html page
+func Login(resp http.ResponseWriter) {
+	resp.Header().Set("Content-Type", "text/html; charset=utf-8")
+	t, err := template.ParseFiles("static/login.html")
 	if err != nil {
-		log.Printf("parse file error: %s\n", err.Error())
-		_, _ = fmt.Fprintf(w, "Unable to load template")
+		logger.Errorln("parse file error:", err.Error())
+		_, _ = fmt.Fprintf(resp, "Unable to load template")
 		return
 	}
-	t.Execute(w, nil)
+	t.Execute(resp, nil)
 }
 
-func Submit(w http.ResponseWriter, r *http.Request) {
-	// parse form, then check username and password
-	err := r.ParseForm()
+// Submit parse form, then check username and password
+func Submit(resp http.ResponseWriter, req *http.Request) {
+	err := req.ParseForm()
 	if err != nil {
-		log.Printf("parse form error: %s\n", err.Error())
-		_, _ = fmt.Fprintf(w, "Fail to parse form: %s", err.Error())
+		logger.Errorln("parse form error:", err.Error())
+		_, _ = fmt.Fprintf(resp, "Fail to parse form: %s", err.Error())
 		return
 	}
-	username := r.FormValue("username")
-	password := r.FormValue("password")
+	username := req.FormValue("username")
+	password := req.FormValue("password")
 	if username != conf.Username || password != conf.Password {
-		returnError(w, http.StatusUnauthorized, "INVALID USERNAME OR PASSWORD")
+		returnError(resp, http.StatusUnauthorized, "INVALID USERNAME OR PASSWORD")
 		return
 	}
 	// Login succeed, set cookie to client and save session
 	id := uuid.Rand().Hex()
-	http.SetCookie(w, &http.Cookie{
+	http.SetCookie(resp, &http.Cookie{
 		Name:    IdentityKeyName,
 		Value:   id,
 		Path:    "/",
@@ -47,6 +48,15 @@ func Submit(w http.ResponseWriter, r *http.Request) {
 		Domain:  conf.Domain,
 		MaxAge:  90000,
 	})
-	Sessions[id] = id
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	sessions.Store(id, id)
+	http.Redirect(resp, req, "/", http.StatusSeeOther)
+}
+
+func HasLogin(r *http.Request) bool {
+	cookie, _ := r.Cookie(IdentityKeyName)
+	if cookie == nil {
+		return false
+	}
+	_, ok := sessions.Load(cookie.Value)
+	return ok
 }
