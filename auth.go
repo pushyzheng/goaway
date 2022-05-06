@@ -33,8 +33,13 @@ func Submit(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 	username := req.FormValue("username")
+	if _, ok := conf.Accounts[username]; !ok {
+		returnError(resp, http.StatusUnauthorized, "INVALID ACCOUNT")
+		return
+	}
+	account := conf.Accounts[username]
 	password := req.FormValue("password")
-	if username != conf.Username || password != conf.Password {
+	if password != account.Password {
 		returnError(resp, http.StatusUnauthorized, "INVALID USERNAME OR PASSWORD")
 		return
 	}

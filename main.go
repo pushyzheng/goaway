@@ -64,10 +64,12 @@ func getProxyPort(r *http.Request) (int, error) {
 	if len(name) == 0 {
 		return -1, errors.New("THE APPLICATION NAME NOT IN HEADERS")
 	}
-	if port, ok := conf.Mapping[name]; !ok {
+	if app, ok := conf.Applications[name]; !ok {
 		return -1, errors.New("NO MATCHING APPLICATION")
+	} else if !app.Enable {
+		return -1, errors.New("APPLICATION IS UNAVAILABLE")
 	} else {
-		return port, nil
+		return app.Port, nil
 	}
 }
 
