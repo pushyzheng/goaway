@@ -45,6 +45,8 @@ func Route(h *handle, resp http.ResponseWriter, req *http.Request) {
 
 func reverseProxy(h *handle, resp http.ResponseWriter, req *http.Request) {
 	appName := req.Header.Get("APPLICATION_NAME")
+	logger.Debugln("reverse proxy, appName:", appName)
+
 	if len(appName) == 0 {
 		ReturnError(resp, http.StatusBadRequest, "Cannot get the name of application in headers")
 		return
@@ -56,7 +58,7 @@ func reverseProxy(h *handle, resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if ok, cause := HasPermission(user.Username, appName, req.RequestURI); !ok {
-		logger.Infof("user(%s) don't have permission, app: %s, uri: %s",
+		logger.Warnf("user(%s) don't have permission, app: %s, uri: %s",
 			user.Username, appName, req.RequestURI)
 		ReturnError(resp, http.StatusUnauthorized, cause)
 		return

@@ -30,6 +30,9 @@ func main() {
 	if err != nil {
 		panic("cannot load config: " + err.Error())
 	}
+	if Conf.Server.Debug {
+		logger.SetLevel(logger.DebugLevel)
+	}
 	runServer()
 }
 
