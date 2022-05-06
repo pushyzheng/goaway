@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+type User struct {
+	SessionId string
+	Username  string
+}
+
 var sessions = sync.Map{}
 
 // Login Return login html page
@@ -34,13 +39,13 @@ func Submit(resp http.ResponseWriter, req *http.Request) {
 	}
 	username := req.FormValue("username")
 	if _, ok := Conf.Accounts[username]; !ok {
-		ReturnError(resp, http.StatusUnauthorized, "INVALID ACCOUNT")
+		ReturnError(resp, http.StatusUnauthorized, "The account is unavailable")
 		return
 	}
 	account := Conf.Accounts[username]
 	password := req.FormValue("password")
 	if password != account.Password {
-		ReturnError(resp, http.StatusUnauthorized, "INVALID USERNAME OR PASSWORD")
+		ReturnError(resp, http.StatusUnauthorized, "Invalid username or password")
 		return
 	}
 	// Login succeed, set cookie to client and save session
@@ -53,15 +58,23 @@ func Submit(resp http.ResponseWriter, req *http.Request) {
 		Domain:  Conf.Server.Domain,
 		MaxAge:  90000,
 	})
-	sessions.Store(id, id)
+	sessions.Store(id, User{SessionId: id, Username: username})
 	http.Redirect(resp, req, "/", http.StatusSeeOther)
 }
 
 func HasLogin(r *http.Request) bool {
+	_, ok := GetUser(r)
+	return ok
+}
+
+func GetUser(r *http.Request) (User, bool) {
 	cookie, _ := r.Cookie(IdentityKeyName)
 	if cookie == nil {
-		return false
+		return User{}, false
 	}
-	_, ok := sessions.Load(cookie.Value)
-	return ok
+	user, ok := sessions.Load(cookie.Value)
+	if !ok {
+		return User{}, false
+	}
+	return user.(User), true
 }

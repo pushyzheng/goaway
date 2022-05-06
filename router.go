@@ -23,7 +23,7 @@ func Route(h *handle, resp http.ResponseWriter, req *http.Request) {
 	logger.Infof("[%s] %s", req.Method, req.URL)
 
 	reqUrl := req.RequestURI
-	if strings.HasPrefix(reqUrl, "/gateway") {
+	if strings.HasPrefix(reqUrl, GatewayUriPrefix) {
 		for path, router := range routerMapping {
 			if !(path == reqUrl || path+"/" == reqUrl) {
 				continue
@@ -44,7 +44,24 @@ func Route(h *handle, resp http.ResponseWriter, req *http.Request) {
 }
 
 func reverseProxy(h *handle, resp http.ResponseWriter, req *http.Request) {
-	port, err := getProxyPort(req)
+	appName := req.Header.Get("APPLICATION_NAME")
+	if len(appName) == 0 {
+		ReturnError(resp, http.StatusBadRequest, "Cannot get the name of application in headers")
+		return
+	}
+	// check permission
+	user, login := GetUser(req)
+	if !login {
+		ReturnError(resp, http.StatusUnauthorized, "The user don't login")
+		return
+	}
+	if ok, cause := HasPermission(user.Username, appName, req.RequestURI); !ok {
+		logger.Infof("user(%s) don't have permission, app: %s, uri: %s",
+			user.Username, appName, req.RequestURI)
+		ReturnError(resp, http.StatusUnauthorized, cause)
+		return
+	}
+	port, err := getProxyPort(appName)
 	if err != nil {
 		ReturnError(resp, http.StatusBadRequest, err.Error())
 		return
@@ -58,11 +75,7 @@ func reverseProxy(h *handle, resp http.ResponseWriter, req *http.Request) {
 	proxy.ServeHTTP(resp, req)
 }
 
-func getProxyPort(r *http.Request) (int, error) {
-	name := r.Header.Get("APPLICATION_NAME")
-	if len(name) == 0 {
-		return -1, errors.New("THE APPLICATION NAME NOT IN HEADERS")
-	}
+func getProxyPort(name string) (int, error) {
 	if app, ok := Conf.Applications[name]; !ok {
 		return -1, errors.New("NO MATCHING APPLICATION")
 	} else if !app.Enable {

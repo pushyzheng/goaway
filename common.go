@@ -10,10 +10,11 @@ import (
 )
 
 const (
-	GatewayLoginUri         = "/gateway/login"
-	GatewaySubmitUri        = "/gateway/submit"
-	GatewayConfigUri        = "/gateway/config"
-	GatewayConfigRefreshUri = "/gateway/config/refresh"
+	GatewayUriPrefix        = "/gateway"
+	GatewayLoginUri         = GatewayUriPrefix + "/login"
+	GatewaySubmitUri        = GatewayUriPrefix + "/submit"
+	GatewayConfigUri        = GatewayUriPrefix + "/config"
+	GatewayConfigRefreshUri = GatewayUriPrefix + "/config/refresh"
 	IdentityKeyName         = "SESSION_ID"
 )
 

@@ -51,7 +51,7 @@ func LoadConfig(envType EnvType) error {
 	logger.Info("Start loading config file, envType:", envType)
 	var filename string
 	if envType == Prod {
-		filename = "Conf.yaml"
+		filename = "conf.yaml"
 	} else {
 		filename = "conf_" + string(envType) + ".yaml"
 	}
