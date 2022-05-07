@@ -20,14 +20,21 @@ var sessions = sync.Map{}
 
 // Login Return login html page
 func Login(resp http.ResponseWriter, req *http.Request) {
+	if HasLogin(req) {
+		http.Redirect(resp, req, "/", http.StatusSeeOther)
+		return
+	}
 	resp.Header().Set("Content-Type", "text/html; charset=utf-8")
-	t, err := template.ParseFiles("static/login.html")
+	t, err := template.ParseFiles(LoginPagePath)
 	if err != nil {
 		logger.Errorln("parse file error:", err.Error())
 		_, _ = fmt.Fprintf(resp, "Unable to load template")
 		return
 	}
-	_ = t.Execute(resp, nil)
+	err = t.Execute(resp, nil)
+	if err != nil {
+		logger.Errorf("template execute error: %s %s", LoginPagePath, err)
+	}
 }
 
 // Submit parse form, then check username and password
@@ -35,7 +42,7 @@ func Submit(resp http.ResponseWriter, req *http.Request) {
 	err := req.ParseForm()
 	if err != nil {
 		logger.Errorln("parse form error:", err.Error())
-		_, _ = fmt.Fprintf(resp, "Fail to parse form: %s", err.Error())
+		ReturnError(resp, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 	username := req.FormValue("username")
@@ -44,8 +51,8 @@ func Submit(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 	account := Conf.Accounts[username]
-	password := req.FormValue("password")
-	if password != account.Password {
+	pwd := req.FormValue("password")
+	if pwd != account.Password {
 		ReturnError(resp, http.StatusUnauthorized, "Invalid username or password")
 		return
 	}
@@ -62,6 +69,13 @@ func Submit(resp http.ResponseWriter, req *http.Request) {
 	})
 	sessions.Store(id, User{SessionId: id, Username: username, Expires: expires})
 	http.Redirect(resp, req, "/", http.StatusSeeOther)
+}
+
+func Logout(resp http.ResponseWriter, req *http.Request) {
+	if user, ok := GetUser(req); ok {
+		sessions.Delete(user.SessionId)
+	}
+	DirectLogin(resp, req)
 }
 
 func HasLogin(r *http.Request) bool {

@@ -63,3 +63,4 @@ Temporary Items
 *.iml
 conf.yaml
 conf_dev.yaml
+go-proxy-server

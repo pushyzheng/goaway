@@ -20,8 +20,6 @@ type Router struct {
 var routerMapping map[string]Router
 
 func Route(h *handle, resp http.ResponseWriter, req *http.Request) {
-	logger.Infof("[%s] %s", req.Method, req.URL)
-
 	reqUrl := req.RequestURI
 	if strings.HasPrefix(reqUrl, GatewayUriPrefix) {
 		for path, router := range routerMapping {
@@ -29,7 +27,7 @@ func Route(h *handle, resp http.ResponseWriter, req *http.Request) {
 				continue
 			}
 			if router.needsLogin && !HasLogin(req) {
-				http.Redirect(resp, req, GatewayLoginUri, http.StatusSeeOther)
+				DirectLogin(resp, req)
 				return
 			}
 			router.Handler(resp, req)
@@ -38,7 +36,7 @@ func Route(h *handle, resp http.ResponseWriter, req *http.Request) {
 		ReturnError(resp, 404, "Not Found")
 	} else if !HasLogin(req) {
 		logger.Debugln("redirect to login page, reqUrl:", reqUrl)
-		http.Redirect(resp, req, GatewayLoginUri, http.StatusSeeOther)
+		DirectLogin(resp, req)
 	} else {
 		reverseProxy(h, resp, req)
 	}
@@ -61,7 +59,7 @@ func reverseProxy(h *handle, resp http.ResponseWriter, req *http.Request) {
 	if ok, cause := HasPermission(user.Username, appName, req.RequestURI); !ok {
 		logger.Warnf("user(%s) don't have permission, app: %s, uri: %s",
 			user.Username, appName, req.RequestURI)
-		ReturnError(resp, http.StatusUnauthorized, cause)
+		ReturnError(resp, http.StatusForbidden, cause)
 		return
 	}
 	port, err := getProxyPort(appName)
@@ -80,9 +78,9 @@ func reverseProxy(h *handle, resp http.ResponseWriter, req *http.Request) {
 
 func getProxyPort(name string) (int, error) {
 	if app, ok := Conf.Applications[name]; !ok {
-		return -1, errors.New("NO MATCHING APPLICATION")
+		return -1, errors.New("no matching application")
 	} else if !app.Enable {
-		return -1, errors.New("APPLICATION IS UNAVAILABLE")
+		return -1, errors.New("application is unavailable")
 	} else {
 		return app.Port, nil
 	}
@@ -92,6 +90,7 @@ func init() {
 	routerMapping = map[string]Router{
 		GatewayLoginUri:         {Handler: Login},
 		GatewaySubmitUri:        {Handler: Submit},
+		GatewayLogoutUri:        {Handler: Logout},
 		GatewayConfigUri:        {Handler: GetConfig, needsLogin: true},
 		GatewayConfigRefreshUri: {Handler: RefreshConfig, needsLogin: true},
 		GatewaySessionUri:       {Handler: GetSessions, needsLogin: true},

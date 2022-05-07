@@ -51,7 +51,7 @@ const Env = Dev
 var Conf Setting
 
 func LoadConfig(envType EnvType) error {
-	logger.Info("Start loading config file, envType:", envType)
+	logger.Info("Start loading config file, envType: ", envType)
 	var filename string
 	if envType == Prod {
 		filename = "conf.yaml"

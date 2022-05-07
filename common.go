@@ -13,10 +13,14 @@ const (
 	GatewayUriPrefix        = "/gateway"
 	GatewayLoginUri         = GatewayUriPrefix + "/login"
 	GatewaySubmitUri        = GatewayUriPrefix + "/submit"
+	GatewayLogoutUri        = GatewayUriPrefix + "/logout"
 	GatewayConfigUri        = GatewayUriPrefix + "/config"
 	GatewayConfigRefreshUri = GatewayUriPrefix + "/config/refresh"
 	GatewaySessionUri       = GatewayUriPrefix + "/sessions"
 	IdentityKeyName         = "SESSION_ID"
+	StaticDir               = "static"
+	LoginPagePath           = StaticDir + "/login.html"
+	ErrorPagePath           = StaticDir + "/error.html"
 )
 
 type ErrorResponse struct {
@@ -47,7 +51,7 @@ func ReturnJson(resp http.ResponseWriter, data interface{}) {
 
 func ReturnError(w http.ResponseWriter, code int, msg string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	t, err := template.ParseFiles("static/error.html")
+	t, err := template.ParseFiles(ErrorPagePath)
 	if err != nil {
 		log.Printf("parse file error: %s\n", err.Error())
 		_, _ = fmt.Fprintf(w, "Unable to load template")
@@ -62,4 +66,8 @@ func ReturnError(w http.ResponseWriter, code int, msg string) {
 		resp.RedirectToLogin = true
 	}
 	_ = t.Execute(w, resp)
+}
+
+func DirectLogin(resp http.ResponseWriter, req *http.Request) {
+	http.Redirect(resp, req, GatewayLoginUri, http.StatusSeeOther)
 }

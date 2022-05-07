@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type handle struct {
@@ -13,7 +14,9 @@ type handle struct {
 }
 
 func (h *handle) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+	start := time.Now().UnixMilli()
 	Route(h, resp, req)
+	logger.Infof("[Proxy] | %dms | %s %s", time.Now().UnixMilli()-start, req.Method, req.URL)
 }
 
 func runServer() {
