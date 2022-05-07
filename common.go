@@ -15,6 +15,7 @@ const (
 	GatewaySubmitUri        = GatewayUriPrefix + "/submit"
 	GatewayConfigUri        = GatewayUriPrefix + "/config"
 	GatewayConfigRefreshUri = GatewayUriPrefix + "/config/refresh"
+	GatewaySessionUri       = GatewayUriPrefix + "/sessions"
 	IdentityKeyName         = "SESSION_ID"
 )
 
@@ -35,7 +36,7 @@ func ReturnJson(resp http.ResponseWriter, data interface{}) {
 	ar := APIResponse{Code: 0, Data: data}
 	buf, err := json.Marshal(ar)
 	if err != nil {
-		logger.Errorln("json marshal error:", ar)
+		logger.Errorln("json marshal error:", err)
 		buf = []byte("json marshal error")
 	}
 	_, err = resp.Write(buf)

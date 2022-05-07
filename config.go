@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	logger "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -36,6 +35,7 @@ type Application struct {
 
 type Permission struct {
 	Enable        bool     `yaml:"enable" json:"enable"`
+	IncludedPaths []string `yaml:"included-paths" json:"includedPaths"`
 	ExcludedPaths []string `yaml:"excluded-paths" json:"excludedPaths"`
 }
 
@@ -45,6 +45,8 @@ type Setting struct {
 	Applications map[string]Application           `yaml:"applications" json:"applications"` // name -> Application
 	Permissions  map[string]map[string]Permission `yaml:"permissions" json:"permissions"`   // username -> {appName -> Permission}
 }
+
+const Env = Dev
 
 var Conf Setting
 
@@ -66,15 +68,10 @@ func LoadConfig(envType EnvType) error {
 	if err != nil {
 		return err
 	}
-	logger.Infof("Read config %s successfully: \n %s", filename, toJson(Conf))
-	return nil
-}
-
-func toJson(setting Setting) string {
-	buf, err := json.Marshal(setting)
-	if err != nil {
-		logger.Error("toJson error", err.Error())
-		return ""
+	logger.Infof("Read config %s successfully: \n %s", filename, ToJson(Conf))
+	// set log level
+	if Conf.Server.Debug {
+		logger.SetLevel(logger.DebugLevel)
 	}
-	return string(buf)
+	return nil
 }

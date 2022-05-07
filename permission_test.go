@@ -42,13 +42,16 @@ func TestHasPermission(t *testing.T) {
 	ok, _ = HasPermission("mark", "flask", "/foo")
 	assert.True(t, ok)
 
-	ok, cause = HasPermission("mark", "spring", "/admin")
+	ok, _ = HasPermission("mark", "flask", "/foo2")
 	assert.False(t, ok)
-	assert.Equal(t, NoPermission, cause)
 
 	ok, cause = HasPermission("mark", "flask", "/admin")
 	assert.False(t, ok)
 	assert.Equal(t, NoPermissionForPath, cause)
+
+	ok, cause = HasPermission("mark", "spring", "/admin")
+	assert.False(t, ok)
+	assert.Equal(t, NoPermission, cause)
 }
 
 func init() {

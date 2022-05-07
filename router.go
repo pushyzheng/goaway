@@ -37,6 +37,7 @@ func Route(h *handle, resp http.ResponseWriter, req *http.Request) {
 		}
 		ReturnError(resp, 404, "Not Found")
 	} else if !HasLogin(req) {
+		logger.Debugln("redirect to login page, reqUrl:", reqUrl)
 		http.Redirect(resp, req, GatewayLoginUri, http.StatusSeeOther)
 	} else {
 		reverseProxy(h, resp, req)
@@ -93,5 +94,6 @@ func init() {
 		GatewaySubmitUri:        {Handler: Submit},
 		GatewayConfigUri:        {Handler: GetConfig, needsLogin: true},
 		GatewayConfigRefreshUri: {Handler: RefreshConfig, needsLogin: true},
+		GatewaySessionUri:       {Handler: GetSessions, needsLogin: true},
 	}
 }

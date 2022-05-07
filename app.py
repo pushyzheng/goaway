@@ -9,6 +9,10 @@ def index():
     print(request.json)
     return 'hello 1'
 
+@app.route('/admin', methods=['GET'])
+def index():
+    return 'admin api'
+
 
 if __name__ == '__main__':
     app.run(port=5000)

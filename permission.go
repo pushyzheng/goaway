@@ -1,5 +1,7 @@
 package main
 
+import logger "github.com/sirupsen/logrus"
+
 const (
 	InvalidAccount      = "The account is invalid"
 	NoPermission        = "No permission for this application"
@@ -41,15 +43,15 @@ func HasPermission(name string, appName string, uri string) (bool, string) {
 		return false, InvalidAccount
 	}
 	if at.IsAdmin {
+		logger.Debugf("The user(%s) is admin, skip permission verification", name)
 		return true, ""
 	}
 	if p, exists = GetPermissionsForApp(name, appName); !exists || !p.Enable {
 		return false, NoPermission
 	}
-	for _, path := range p.ExcludedPaths {
-		if path == uri {
-			return false, NoPermissionForPath
-		}
+	logger.Debugf("The permissions of current user(%s):%s", name, ToJson(p))
+	if Contains(p.IncludedPaths, uri) && !Contains(p.ExcludedPaths, uri) {
+		return true, ""
 	}
-	return true, ""
+	return false, NoPermissionForPath
 }

@@ -11,8 +11,9 @@ import (
 )
 
 type User struct {
-	SessionId string
-	Username  string
+	SessionId string    `json:"sessionId"`
+	Username  string    `json:"username"`
+	Expires   time.Time `json:"expires"`
 }
 
 var sessions = sync.Map{}
@@ -50,15 +51,16 @@ func Submit(resp http.ResponseWriter, req *http.Request) {
 	}
 	// Login succeed, set cookie to client and save session
 	id := uuid.Rand().Hex()
+	expires := time.Now().Add(Conf.Server.CookieExpiredHours * time.Hour)
 	http.SetCookie(resp, &http.Cookie{
 		Name:    IdentityKeyName,
 		Value:   id,
 		Path:    "/",
-		Expires: time.Now().Add(Conf.Server.CookieExpiredHours * time.Hour),
+		Expires: expires,
 		Domain:  Conf.Server.Domain,
 		MaxAge:  90000,
 	})
-	sessions.Store(id, User{SessionId: id, Username: username})
+	sessions.Store(id, User{SessionId: id, Username: username, Expires: expires})
 	http.Redirect(resp, req, "/", http.StatusSeeOther)
 }
 

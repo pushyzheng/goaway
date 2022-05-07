@@ -26,12 +26,9 @@ func runServer() {
 }
 
 func main() {
-	err := LoadConfig(Prod)
+	err := LoadConfig(Env)
 	if err != nil {
 		panic("cannot load config: " + err.Error())
-	}
-	if Conf.Server.Debug {
-		logger.SetLevel(logger.DebugLevel)
 	}
 	runServer()
 }
