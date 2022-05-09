@@ -17,6 +17,8 @@ applications:
   flask:
     enable: true
     port: 5000
+    public:
+      - /public
 
 permissions:
   admin:
@@ -27,5 +29,8 @@ permissions:
   guest:
     flask:
       enable: true
+      included-paths:
+        - /
+        - /你好世界
       excluded-paths:
         - /admin

@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	IdentityKeyName         = "SESSION_ID"
 	GatewayUriPrefix        = "/gateway"
 	GatewayLoginUri         = GatewayUriPrefix + "/login"
 	GatewaySubmitUri        = GatewayUriPrefix + "/submit"
@@ -17,7 +18,6 @@ const (
 	GatewayConfigUri        = GatewayUriPrefix + "/config"
 	GatewayConfigRefreshUri = GatewayUriPrefix + "/config/refresh"
 	GatewaySessionUri       = GatewayUriPrefix + "/sessions"
-	IdentityKeyName         = "SESSION_ID"
 	StaticDir               = "static"
 	LoginPagePath           = StaticDir + "/login.html"
 	ErrorPagePath           = StaticDir + "/error.html"

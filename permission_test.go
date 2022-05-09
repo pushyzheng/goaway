@@ -31,7 +31,6 @@ func TestGetPermissionsForApp(t *testing.T) {
 
 func TestHasPermission(t *testing.T) {
 	var ok bool
-	var cause string
 
 	ok, _ = HasPermission("admin", "flask", "/foo")
 	assert.True(t, ok)
@@ -45,13 +44,29 @@ func TestHasPermission(t *testing.T) {
 	ok, _ = HasPermission("mark", "flask", "/foo2")
 	assert.False(t, ok)
 
+	ok, _ = HasPermission("mark", "flask", "/public")
+	assert.True(t, ok)
+}
+
+func TestHasPermission2(t *testing.T) {
+	var ok bool
+	var cause string
+
+	ok, cause = HasPermission("Michelle", "flask", "/foo")
+	assert.False(t, ok)
+	assert.Equal(t, InvalidAccount, cause)
+
 	ok, cause = HasPermission("mark", "flask", "/admin")
 	assert.False(t, ok)
 	assert.Equal(t, NoPermissionForPath, cause)
 
-	ok, cause = HasPermission("mark", "spring", "/admin")
+	ok, cause = HasPermission("mark", "gin", "/foo")
 	assert.False(t, ok)
 	assert.Equal(t, NoPermission, cause)
+
+	ok, cause = HasPermission("mark", "spring", "/admin")
+	assert.False(t, ok)
+	assert.Equal(t, InvalidApplication, cause)
 }
 
 func init() {

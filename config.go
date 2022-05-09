@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	logger "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -29,8 +30,9 @@ type Account struct {
 }
 
 type Application struct {
-	Enable bool `yaml:"enable" json:"enable"`
-	Port   int  `yaml:"port" json:"port"`
+	Enable bool     `yaml:"enable" json:"enable"`
+	Port   int      `yaml:"port" json:"port"`
+	Public []string `yaml:"public" json:"public"`
 }
 
 type Permission struct {
@@ -69,9 +71,27 @@ func LoadConfig(envType EnvType) error {
 		return err
 	}
 	logger.Infof("Read config %s successfully: \n %s", filename, ToJson(Conf))
+	if err = check(); err != nil {
+		return fmt.Errorf("check fail: " + err.Error())
+	}
 	// set log level
 	if Conf.Server.Debug {
 		logger.SetLevel(logger.DebugLevel)
+	}
+	return nil
+}
+
+func check() error {
+	var err error
+	if err = assertNotBlank("server.domain", Conf.Server.Domain); err != nil {
+		return err
+	}
+	return nil
+}
+
+func assertNotBlank(name string, s string) error {
+	if len(s) == 0 {
+		return fmt.Errorf("the %s cannot be blank", name)
 	}
 	return nil
 }

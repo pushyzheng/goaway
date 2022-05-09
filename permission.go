@@ -1,9 +1,13 @@
 package main
 
-import logger "github.com/sirupsen/logrus"
+import (
+	logger "github.com/sirupsen/logrus"
+)
 
 const (
+	All                 = "*"
 	InvalidAccount      = "The account is invalid"
+	InvalidApplication  = "The application is invalid"
 	NoPermission        = "No permission for this application"
 	NoPermissionForPath = "No permission for this path"
 )
@@ -40,17 +44,29 @@ func HasPermission(name string, appName string, uri string) (bool, string) {
 	var exists bool
 
 	if at, exists = Conf.Accounts[name]; !exists || !at.Enable {
+		logger.Warn("The account is invalid: ", appName)
 		return false, InvalidAccount
 	}
 	if at.IsAdmin {
 		logger.Debugf("The user(%s) is admin, skip permission verification", name)
 		return true, ""
 	}
+	// check the public path of application
+	if app, exists := Conf.Applications[appName]; !exists || !app.Enable {
+		logger.Warn("The application is invalid: ", appName)
+		return false, InvalidApplication
+	} else if ContainsPath(app.Public, All) || ContainsPath(app.Public, uri) {
+		return true, ""
+	}
+
+	// check the permission of current user
 	if p, exists = GetPermissionsForApp(name, appName); !exists || !p.Enable {
 		return false, NoPermission
 	}
 	logger.Debugf("The permissions of current user(%s):%s", name, ToJson(p))
-	if Contains(p.IncludedPaths, uri) && !Contains(p.ExcludedPaths, uri) {
+
+	if (ContainsPath(p.IncludedPaths, All) || ContainsPath(p.IncludedPaths, uri)) &&
+		(!ContainsPath(p.ExcludedPaths, All) || !ContainsPath(p.ExcludedPaths, uri)) {
 		return true, ""
 	}
 	return false, NoPermissionForPath
