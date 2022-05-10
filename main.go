@@ -8,12 +8,14 @@ import (
 	"time"
 )
 
-type handle struct {
-	host string
-	port string
+var sh ServerHandler
+
+type ServerHandler struct {
+	Host string
+	Port string
 }
 
-func (h *handle) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (h *ServerHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	start := time.Now()
 	Route(resp, req)
 	cost := time.Since(start)
@@ -22,9 +24,9 @@ func (h *handle) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 }
 
 func runServer() {
-	h := &handle{}
+	sh = ServerHandler{}
 	logger.Infof("Running on http://localhost:%d", Conf.Server.Port)
-	err := http.ListenAndServe(":"+strconv.Itoa(Conf.Server.Port), h)
+	err := http.ListenAndServe(":"+strconv.Itoa(Conf.Server.Port), &sh)
 	if err != nil {
 		log.Fatalln("ListenAndServe: ", err)
 	}

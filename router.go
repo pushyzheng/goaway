@@ -90,7 +90,7 @@ func reverse(w http.ResponseWriter, req *http.Request, appName string, app Appli
 			fs.ServeHTTP(w, req)
 		}
 	} else if app.ServerType == WebServer {
-		remote, err := url.Parse("http://" + req.Host + ":" + strconv.Itoa(app.Port))
+		remote, err := url.Parse("http://" + sh.Host + ":" + strconv.Itoa(app.Port))
 		if err != nil {
 			ReturnError(w, http.StatusBadRequest, err.Error())
 			return
