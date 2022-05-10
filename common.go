@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 const (
@@ -50,6 +51,8 @@ func ReturnJson(resp http.ResponseWriter, data interface{}) {
 }
 
 func ReturnError(w http.ResponseWriter, code int, msg string) {
+	errorCounter.WithLabelValues(strconv.Itoa(code)).Inc()
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	t, err := template.ParseFiles(ErrorPagePath)
 	if err != nil {

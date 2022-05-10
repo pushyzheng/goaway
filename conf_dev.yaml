@@ -1,8 +1,9 @@
 server:
-  port: 3000
+  port: 9000
   domain: localhost
   cookie-expired-hours: 72
   debug: true
+  prometheus-path: /metrics
 
 accounts:
   admin:

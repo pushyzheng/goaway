@@ -39,6 +39,10 @@ func Login(resp http.ResponseWriter, req *http.Request) {
 
 // Submit parse form, then check username and password
 func Submit(resp http.ResponseWriter, req *http.Request) {
+	if HasLogin(req) {
+		http.Redirect(resp, req, "/", http.StatusSeeOther)
+		return
+	}
 	err := req.ParseForm()
 	if err != nil {
 		logger.Errorln("parse form error:", err.Error())

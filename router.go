@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	logger "github.com/sirupsen/logrus"
 	"net/http"
 	"net/http/httputil"
@@ -17,13 +18,22 @@ type Router struct {
 	needsLogin bool
 }
 
-var routerMapping map[string]Router
+var (
+	routerMapping map[string]Router
+	prom          = promhttp.Handler()
+)
 
 func Route(h *handle, resp http.ResponseWriter, req *http.Request) {
-	reqUrl := req.RequestURI
+	reqUrl := req.URL.Path
+	routerCounter.WithLabelValues(reqUrl).Inc()
+
+	if Conf.Server.PrometheusPath != "" && EqualsUri(reqUrl, Conf.Server.PrometheusPath) {
+		prom.ServeHTTP(resp, req)
+		return
+	}
 	if strings.HasPrefix(reqUrl, GatewayUriPrefix) {
 		for path, router := range routerMapping {
-			if !(path == reqUrl || path+"/" == reqUrl) {
+			if !EqualsUri(reqUrl, path) {
 				continue
 			}
 			if router.needsLogin && !HasLogin(req) {
@@ -47,6 +57,7 @@ func reverseProxy(h *handle, resp http.ResponseWriter, req *http.Request) {
 	logger.Debugln("reverse proxy, appName:", appName)
 
 	if len(appName) == 0 {
+		reverseCounter.WithLabelValues("null").Inc()
 		ReturnError(resp, http.StatusBadRequest, "Cannot get the name of application in headers")
 		return
 	}
@@ -72,6 +83,7 @@ func reverseProxy(h *handle, resp http.ResponseWriter, req *http.Request) {
 		ReturnError(resp, http.StatusBadRequest, err.Error())
 		return
 	}
+	reverseCounter.WithLabelValues(appName).Inc()
 	proxy := httputil.NewSingleHostReverseProxy(remote)
 	proxy.ServeHTTP(resp, req)
 }

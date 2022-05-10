@@ -19,8 +19,9 @@ type EnvType string
 type Server struct {
 	Port               int           `yaml:"port" json:"port"`
 	Domain             string        `yaml:"domain" json:"domain"`
-	CookieExpiredHours time.Duration `yaml:"cookie-expired-hours" json:"CookieExpiredHours"`
+	CookieExpiredHours time.Duration `yaml:"cookie-expired-hours" json:"cookieExpiredHours"`
 	Debug              bool          `yaml:"debug" json:"debug"`
+	PrometheusPath     string        `yaml:"prometheus-path" json:"prometheusPath"`
 }
 
 type Account struct {

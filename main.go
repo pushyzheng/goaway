@@ -14,9 +14,11 @@ type handle struct {
 }
 
 func (h *handle) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
-	start := time.Now().UnixMilli()
+	start := time.Now()
 	Route(h, resp, req)
-	logger.Infof("[Proxy] | %dms | %s %s", time.Now().UnixMilli()-start, req.Method, req.URL)
+	cost := time.Since(start)
+	entranceSummary.Observe(float64(cost.Milliseconds()))
+	logger.Infof("[Proxy] | %dms | %s %s", cost.Milliseconds(), req.Method, req.URL)
 }
 
 func runServer() {

@@ -52,3 +52,7 @@ func EncodeUrl(s string) string {
 func EncodeUrlComponent(s string) string {
 	return url.QueryEscape(s)
 }
+
+func EqualsUri(uri, other string) bool {
+	return uri == other || uri == other+"/"
+}
