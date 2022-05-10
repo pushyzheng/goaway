@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	All                 = "*"
+	All                 = "/*"
 	InvalidAccount      = "The account is invalid"
 	InvalidApplication  = "The application is invalid"
 	NoPermission        = "No permission for this application"

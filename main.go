@@ -15,7 +15,7 @@ type handle struct {
 
 func (h *handle) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	start := time.Now()
-	Route(h, resp, req)
+	Route(resp, req)
 	cost := time.Since(start)
 	entranceSummary.Observe(float64(cost.Milliseconds()))
 	logger.Infof("[Proxy] | %dms | %s %s", cost.Milliseconds(), req.Method, req.URL)
@@ -35,6 +35,7 @@ func main() {
 	if err != nil {
 		panic("cannot load config: " + err.Error())
 	}
+	InitFs()
 	runServer()
 }
 

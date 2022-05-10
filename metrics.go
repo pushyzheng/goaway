@@ -23,10 +23,15 @@ var (
 		[]string{"path"},
 	)
 
-	reverseCounter = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "reverse_counter_vec",
-			Help: "The counter metrics of reverse proxy",
+	reverseCounter = prometheus.NewSummaryVec(
+		prometheus.SummaryOpts{
+			Name: "reverse_duration_milliseconds",
+			Help: "The summary metrics of reverse proxy",
+			Objectives: map[float64]float64{
+				0.5:  0.05,
+				0.9:  0.01,
+				0.99: 0.001,
+			},
 		},
 		[]string{"appName"},
 	)

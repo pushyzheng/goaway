@@ -1,4 +1,5 @@
 from flask import Flask, request
+import time
 
 app = Flask(__name__)
 
@@ -21,6 +22,9 @@ def hello_world_ch():
 def admin():
     return 'admin api'
 
+@app.route('/sleep')
+def sleep():
+    return time.sleep(3)
 
 if __name__ == '__main__':
     app.run(port=5000)

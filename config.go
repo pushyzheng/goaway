@@ -9,12 +9,16 @@ import (
 )
 
 const (
-	Prod EnvType = "prod"
-	Dev  EnvType = "dev"
-	Test EnvType = "test"
+	Prod       EnvType    = "prod"
+	Dev        EnvType    = "dev"
+	Test       EnvType    = "test"
+	FileServer ServerType = "file"
+	WebServer  ServerType = "web" // Restful API or html page
 )
 
 type EnvType string
+
+type ServerType string
 
 type Server struct {
 	Port               int           `yaml:"port" json:"port"`
@@ -31,9 +35,11 @@ type Account struct {
 }
 
 type Application struct {
-	Enable bool     `yaml:"enable" json:"enable"`
-	Port   int      `yaml:"port" json:"port"`
-	Public []string `yaml:"public" json:"public"`
+	Enable     bool       `yaml:"enable" json:"enable"`
+	ServerType ServerType `yaml:"server-type" json:"serverType"`
+	Port       int        `yaml:"port" json:"port"`
+	Dir        string     `yaml:"dir" json:"dir"`
+	Public     []string   `yaml:"public" json:"public"`
 }
 
 type Permission struct {

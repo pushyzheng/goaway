@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	logger "github.com/sirupsen/logrus"
 	"net/http"
@@ -9,6 +8,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Handler func(resp http.ResponseWriter, req *http.Request)
@@ -20,10 +20,11 @@ type Router struct {
 
 var (
 	routerMapping map[string]Router
+	fsMapping     map[string]http.Handler
 	prom          = promhttp.Handler()
 )
 
-func Route(h *handle, resp http.ResponseWriter, req *http.Request) {
+func Route(resp http.ResponseWriter, req *http.Request) {
 	reqUrl := req.URL.Path
 	routerCounter.WithLabelValues(reqUrl).Inc()
 
@@ -44,57 +45,73 @@ func Route(h *handle, resp http.ResponseWriter, req *http.Request) {
 			return
 		}
 		ReturnError(resp, 404, "Not Found")
-	} else if !HasLogin(req) {
-		logger.Debugln("redirect to login page, reqUrl:", reqUrl)
-		DirectLogin(resp, req)
 	} else {
-		reverseProxy(h, resp, req)
+		reverseProxy(resp, req)
 	}
 }
 
-func reverseProxy(h *handle, resp http.ResponseWriter, req *http.Request) {
+func reverseProxy(w http.ResponseWriter, req *http.Request) {
+	start := time.Now()
 	appName := req.Header.Get("APPLICATION_NAME")
+	reqUrl := req.URL.Path
 	logger.Debugln("reverse proxy, appName:", appName)
 
-	if len(appName) == 0 {
-		reverseCounter.WithLabelValues("null").Inc()
-		ReturnError(resp, http.StatusBadRequest, "Cannot get the name of application in headers")
+	app, ok := Conf.Applications[appName]
+	if !ok || !app.Enable {
+		ReturnError(w, http.StatusBadRequest, "The application is invalid")
 		return
 	}
-	// check permission
-	user, login := GetUser(req)
-	if !login {
-		ReturnError(resp, http.StatusUnauthorized, "The user don't login")
-		return
+	if ContainsPath(app.Public, reqUrl) || ContainsPath(app.Public, All) {
+		logger.Debugf("'%s' is public url of [%s], skip verification", reqUrl, appName)
+	} else {
+		// check permission
+		user, login := GetUser(req)
+		if !login {
+			DirectLogin(w, req)
+			return
+		}
+		if ok, cause := HasPermission(user.Username, appName, reqUrl); !ok {
+			logger.Warnf("user(%s) don't have permission, app: %s, uri: %s",
+				user.Username, appName, req.RequestURI)
+			ReturnError(w, http.StatusForbidden, cause)
+			return
+		}
 	}
-	if ok, cause := HasPermission(user.Username, appName, req.RequestURI); !ok {
-		logger.Warnf("user(%s) don't have permission, app: %s, uri: %s",
-			user.Username, appName, req.RequestURI)
-		ReturnError(resp, http.StatusForbidden, cause)
-		return
-	}
-	port, err := getProxyPort(appName)
-	if err != nil {
-		ReturnError(resp, http.StatusBadRequest, err.Error())
-		return
-	}
-	remote, err := url.Parse("http://" + h.host + ":" + strconv.Itoa(port))
-	if err != nil {
-		ReturnError(resp, http.StatusBadRequest, err.Error())
-		return
-	}
-	reverseCounter.WithLabelValues(appName).Inc()
-	proxy := httputil.NewSingleHostReverseProxy(remote)
-	proxy.ServeHTTP(resp, req)
+	reverse(w, req, appName, app)
+	reverseCounter.WithLabelValues(appName).Observe(float64(time.Since(start).Milliseconds()))
 }
 
-func getProxyPort(name string) (int, error) {
-	if app, ok := Conf.Applications[name]; !ok {
-		return -1, errors.New("no matching application")
-	} else if !app.Enable {
-		return -1, errors.New("application is unavailable")
+func reverse(w http.ResponseWriter, req *http.Request, appName string, app Application) {
+	if app.ServerType == FileServer {
+		if fs, ok := fsMapping[appName]; !ok {
+			ReturnError(w, http.StatusInternalServerError, "Cannot find file server")
+			return
+		} else {
+			fs.ServeHTTP(w, req)
+		}
+	} else if app.ServerType == WebServer {
+		remote, err := url.Parse("http://" + req.Host + ":" + strconv.Itoa(app.Port))
+		if err != nil {
+			ReturnError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		proxy := httputil.NewSingleHostReverseProxy(remote)
+		proxy.ServeHTTP(w, req)
 	} else {
-		return app.Port, nil
+		logger.Errorln("unsupported server type: ", app.ServerType)
+		ReturnError(w, http.StatusInternalServerError, "unknown error")
+	}
+}
+
+func InitFs() {
+	fsMapping = map[string]http.Handler{}
+	for name, app := range Conf.Applications {
+		if app.ServerType == FileServer {
+			if app.Dir == "" {
+				panic("The dir cannot be blank: " + name)
+			}
+			fsMapping[name] = http.FileServer(http.Dir(app.Dir))
+		}
 	}
 }
 
