@@ -33,7 +33,7 @@ var (
 				0.99: 0.001,
 			},
 		},
-		[]string{"appName"},
+		[]string{"appName", "path"},
 	)
 
 	errorCounter = prometheus.NewCounterVec(

@@ -78,7 +78,7 @@ func reverseProxy(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 	reverse(w, req, appName, app)
-	reverseCounter.WithLabelValues(appName).Observe(float64(time.Since(start).Milliseconds()))
+	reverseCounter.WithLabelValues(appName, reqUrl).Observe(float64(time.Since(start).Milliseconds()))
 }
 
 func reverse(w http.ResponseWriter, req *http.Request, appName string, app Application) {
