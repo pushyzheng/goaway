@@ -17,9 +17,17 @@ accounts:
 applications:
   flask:
     enable: true
+    server-type: web
     port: 5000
     public:
+      - /
       - /public
+  blog:
+    enable: true
+    server-type: file
+    dir: ./example-server/blog
+    public:
+      - /*
 
 permissions:
   admin:

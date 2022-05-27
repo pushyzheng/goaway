@@ -55,11 +55,12 @@ type Setting struct {
 	Permissions  map[string]map[string]Permission `yaml:"permissions" json:"permissions"`   // username -> {appName -> Permission}
 }
 
-const Env = Dev
+var Env EnvType
 
 var Conf Setting
 
 func LoadConfig(envType EnvType) error {
+	Env = envType
 	logger.Info("Start loading config file, envType: ", envType)
 	var filename string
 	if envType == Prod {
@@ -90,7 +91,7 @@ func LoadConfig(envType EnvType) error {
 
 func check() error {
 	var err error
-	if err = assertNotBlank("server.domain", Conf.Server.Domain); err != nil {
+	if err = assertNotBlank("example-server.domain", Conf.Server.Domain); err != nil {
 		return err
 	}
 	return nil
