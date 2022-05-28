@@ -1,6 +1,9 @@
 package main
 
-import "github.com/prometheus/client_golang/prometheus"
+import (
+	"github.com/prometheus/client_golang/prometheus"
+	logger "github.com/sirupsen/logrus"
+)
 
 var (
 	entranceSummary = prometheus.NewSummary(
@@ -45,9 +48,12 @@ var (
 	)
 )
 
-func init() {
-	prometheus.MustRegister(entranceSummary)
-	prometheus.MustRegister(routerCounter)
-	prometheus.MustRegister(reverseCounter)
-	prometheus.MustRegister(errorCounter)
+func RegisterProm() {
+	if len(Conf.Server.PrometheusPath) != 0 {
+		logger.Infof("Register prometheus metrics in '%s'", Conf.Server.PrometheusPath)
+		prometheus.MustRegister(entranceSummary)
+		prometheus.MustRegister(routerCounter)
+		prometheus.MustRegister(reverseCounter)
+		prometheus.MustRegister(errorCounter)
+	}
 }

@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+const (
+	defaultExpiredHoursOfCookies = 24
+)
+
 type User struct {
 	SessionId string    `json:"sessionId"`
 	Username  string    `json:"username"`
@@ -62,6 +66,10 @@ func Submit(resp http.ResponseWriter, req *http.Request) {
 	}
 	// Login succeed, set cookie to client and save session
 	id := uuid.Rand().Hex()
+	expired := Conf.Server.CookieExpiredHours
+	if expired == 0 {
+		expired = defaultExpiredHoursOfCookies
+	}
 	expires := time.Now().Add(Conf.Server.CookieExpiredHours * time.Hour)
 	http.SetCookie(resp, &http.Cookie{
 		Name:    IdentityKeyName,

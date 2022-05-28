@@ -1,4 +1,4 @@
-module go-proxy-server
+module goaway
 
 go 1.15
 

@@ -1,13 +1,15 @@
 package main
 
 import (
+	"flag"
 	logger "github.com/sirupsen/logrus"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 )
+
+var envFlag = flag.String("env", string(Dev), "Input env type")
 
 var sh ServerHandler
 
@@ -34,27 +36,25 @@ func runServer() {
 }
 
 func main() {
-	args := os.Args
-	err := LoadConfig(parseEnv(args))
+	flag.Parse()
+	err := LoadConfig(parseEnv(*envFlag))
 	if err != nil {
 		panic("cannot load config: " + err.Error())
 	}
 	InitFs()
+	RegisterProm()
 	runServer()
 }
 
-func parseEnv(args []string) EnvType {
-	if len(args) < 1 {
-		return Dev // default env type
-	}
-	if args[1] == string(Prod) {
+func parseEnv(s string) EnvType {
+	if s == string(Prod) {
 		return Prod
-	} else if args[1] == string(Dev) {
+	} else if s == string(Dev) {
 		return Dev
-	} else if args[1] == string(Test) {
+	} else if s == string(Test) {
 		return Test
 	} else {
-		panic("The env type is illegal: " + args[1])
+		panic("The env type is illegal: " + s)
 	}
 }
 
