@@ -1,9 +1,11 @@
 server:
+  name: 飞鸟和她
   port: 9000
   domain: localhost
   cookie-expired-hours: 72
   debug: true
   prometheus-path: /metrics
+  statistics: true
 
 accounts:
   admin:

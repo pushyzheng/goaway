@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	logger "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"time"
+
+	logger "github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -21,11 +22,13 @@ type EnvType string
 type ServerType string
 
 type Server struct {
+	Name               string        `yaml:"name" json:"name"`
 	Port               int           `yaml:"port" json:"port"`
 	Domain             string        `yaml:"domain" json:"domain"`
 	CookieExpiredHours time.Duration `yaml:"cookie-expired-hours" json:"cookieExpiredHours"`
 	Debug              bool          `yaml:"debug" json:"debug"`
 	PrometheusPath     string        `yaml:"prometheus-path" json:"prometheusPath"`
+	Statistics         bool          `yaml:"statistics" json:"statistics"`
 }
 
 type Account struct {

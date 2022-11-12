@@ -43,6 +43,7 @@ func main() {
 	}
 	InitFs()
 	RegisterProm()
+	initRedis()
 	runServer()
 }
 

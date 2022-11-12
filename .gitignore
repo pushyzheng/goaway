@@ -63,4 +63,5 @@ Temporary Items
 *.iml
 conf.yaml
 conf_dev.yaml
-goaway
+releases/goaway
+releases

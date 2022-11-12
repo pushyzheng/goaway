@@ -1,14 +1,15 @@
 package main
 
 import (
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	logger "github.com/sirupsen/logrus"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	logger "github.com/sirupsen/logrus"
 )
 
 type Handler func(resp http.ResponseWriter, req *http.Request)
@@ -61,6 +62,7 @@ func reverseProxy(w http.ResponseWriter, req *http.Request) {
 		ReturnError(w, http.StatusBadRequest, "The application is invalid")
 		return
 	}
+	record(appName, req)
 	if ContainsPath(app.Public, reqUrl) || ContainsPath(app.Public, All) {
 		logger.Debugf("'%s' is public url of [%s], skip verification", reqUrl, appName)
 	} else {

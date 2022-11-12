@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	logger "github.com/sirupsen/logrus"
-	"github.com/snluu/uuid"
 	"html/template"
 	"net/http"
 	"sync"
 	"time"
+
+	logger "github.com/sirupsen/logrus"
+	"github.com/snluu/uuid"
 )
 
 const (
@@ -35,7 +36,11 @@ func Login(resp http.ResponseWriter, req *http.Request) {
 		_, _ = fmt.Fprintf(resp, "Unable to load template")
 		return
 	}
-	err = t.Execute(resp, nil)
+	site := Conf.Server.Name
+	if len(site) == 0 {
+		site = "goaway"
+	}
+	err = t.Execute(resp, map[string]string{"Site": site})
 	if err != nil {
 		logger.Errorf("template execute error: %s %s", LoginPagePath, err)
 	}
