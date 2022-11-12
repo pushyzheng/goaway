@@ -56,3 +56,11 @@ func EncodeUrlComponent(s string) string {
 func EqualsUri(uri, other string) bool {
 	return uri == other || uri == other+"/"
 }
+
+func ParseDomainFromUrl(input string) string {
+	u, err := url.Parse(input)
+	if err != nil {
+		return "invalid url: " + input
+	}
+	return u.Hostname()
+}
