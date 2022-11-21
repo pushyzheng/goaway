@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	logger "github.com/sirupsen/logrus"
 	"net/url"
+	"time"
 )
+
+const DefaultStringFormat = "2006-01-02"
 
 func ToJson(v interface{}) string {
 	buf, err := json.Marshal(v)
@@ -63,4 +66,8 @@ func ParseDomainFromUrl(input string) string {
 		return "invalid url: " + input
 	}
 	return u.Hostname()
+}
+
+func GetTodayDate() string {
+	return time.Now().Format(DefaultStringFormat)
 }

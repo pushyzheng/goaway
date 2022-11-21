@@ -16,12 +16,15 @@ const (
 	GatewayLoginUri         = GatewayUriPrefix + "/login"
 	GatewaySubmitUri        = GatewayUriPrefix + "/submit"
 	GatewayLogoutUri        = GatewayUriPrefix + "/logout"
-	GatewayConfigUri        = GatewayUriPrefix + "/config"
-	GatewayConfigRefreshUri = GatewayUriPrefix + "/config/refresh"
-	GatewaySessionUri       = GatewayUriPrefix + "/sessions"
+	GatewayConfigUri        = GatewayUriPrefix + "/api/config"
+	GatewayStatisticsUri    = GatewayUriPrefix + "/statistics"
+	GatewayConfigRefreshUri = GatewayUriPrefix + "/api/config/refresh"
+	GatewaySessionUri       = GatewayUriPrefix + "/api/sessions"
+	GatewayStatisticsApiUri = GatewayUriPrefix + "/api/statistics"
 	StaticDir               = "static"
 	LoginPagePath           = StaticDir + "/login.html"
 	ErrorPagePath           = StaticDir + "/error.html"
+	StatisticsPagePath      = StaticDir + "/statistics.html"
 )
 
 type ErrorResponse struct {

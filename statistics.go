@@ -5,14 +5,40 @@ import (
 	"net/http"
 )
 
-func record(appName string, req *http.Request) {
+const AppsKey = "goaway::statistics::apps"
+
+func Record(appName string, req *http.Request) {
 	refer := req.Header.Get("Referer")
 	uri := req.URL.Path
 
-	redisConn.HIncrBy("goaway::statistics::apps", appName, 1)
+	incrOne("goaway::statistics::apps", appName)
 	if len(refer) > 0 {
-		hostname := ParseDomainFromUrl(refer)
-		redisConn.HIncrBy(fmt.Sprintf("goaway::statistics::entry_refer_%s", appName), hostname, 1)
+		incrOne(formatReferKey(appName), ParseDomainFromUrl(refer))
 	}
-	redisConn.HIncrBy(fmt.Sprintf("goaway::statistics::entry_path_%s", appName), uri, 1)
+	incrOne(formatPathKey(appName), uri)
+	incrOne("goaway::statistics::date", GetTodayDate())
+}
+
+func GetApps() ([]string, error) {
+	return redisConn.HKeys(AppsKey).Result()
+}
+
+func GetRefers(appName string) (map[string]string, error) {
+	return redisConn.HGetAll(formatReferKey(appName)).Result()
+}
+
+func GetPaths(appName string) (map[string]string, error) {
+	return redisConn.HGetAll(formatPathKey(appName)).Result()
+}
+
+func formatReferKey(appName string) string {
+	return fmt.Sprintf("goaway::statistics::entry_refer_%s", appName)
+}
+
+func formatPathKey(appName string) string {
+	return fmt.Sprintf("goaway::statistics::entry_path_%s", appName)
+}
+
+func incrOne(key string, field string) {
+	redisConn.HIncrBy(key, field, 1)
 }

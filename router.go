@@ -62,7 +62,7 @@ func reverseProxy(w http.ResponseWriter, req *http.Request) {
 		ReturnError(w, http.StatusBadRequest, "The application is invalid")
 		return
 	}
-	record(appName, req)
+	Record(appName, req)
 	if ContainsPath(app.Public, reqUrl) || ContainsPath(app.Public, All) {
 		logger.Debugf("'%s' is public url of [%s], skip verification", reqUrl, appName)
 	} else {
@@ -125,5 +125,7 @@ func init() {
 		GatewayConfigUri:        {Handler: GetConfig, needsLogin: true},
 		GatewayConfigRefreshUri: {Handler: RefreshConfig, needsLogin: true},
 		GatewaySessionUri:       {Handler: GetSessions, needsLogin: true},
+		GatewayStatisticsUri:    {Handler: GetStatisticsPage, needsLogin: true},
+		GatewayStatisticsApiUri: {Handler: GetStatistics, needsLogin: true},
 	}
 }
